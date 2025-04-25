@@ -4,8 +4,6 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../redux/store';
 import { fetchNews, Article, selectAuthorStats } from '../redux/Slices/newsSlice';
-import { Bar, Line, Pie } from 'react-chartjs-2';
-
 import {
   Chart as ChartJS,
   ArcElement,
@@ -54,14 +52,10 @@ const Dashboard = () => {
 
   // Stats calculation
   const authorMap: Record<string, number> = {};
-  let blogCount = 0;
-  let newsCount = 0;
+
 
   articles.forEach((article: Article) => {
     const author = article.author?.trim() || 'Unknown';
-    const isBlog = article.content?.toLowerCase().includes('blog');
-    if (isBlog) blogCount++;
-    else newsCount++;
 
     authorMap[author] = (authorMap[author] || 0) + 1;
   });

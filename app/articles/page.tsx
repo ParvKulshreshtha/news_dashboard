@@ -9,6 +9,7 @@ import {
   setStartDateFilter,
   setEndDateFilter,
   setSortField,
+  Article,
 } from '../redux/Slices/newsSlice';
 
 const categoryTabs = ['All', 'India', 'Business', 'Tech', 'Startup', 'International'];
@@ -74,15 +75,15 @@ const selectFilteredArticles = (state: RootState) => {
 
 const ArticlesPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const loading = useSelector((state: RootState) => state.news.loading);
-  const error = useSelector((state: RootState) => state.news.error);
+//   const loading = useSelector((state: RootState) => state.news.loading);
+//   const error = useSelector((state: RootState) => state.news.error);
   const filters = useSelector((state: RootState) => state.news.filters);
   const sort = useSelector((state: RootState) => state.news.sort);
   const filteredArticles = useSelector(selectFilteredArticles);
 
   const [selectedTab, setSelectedTab] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedArticle, setSelectedArticle] = useState<any | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
 
   const itemsPerPage = 10;
@@ -113,7 +114,7 @@ const ArticlesPage = () => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const openOffcanvas = (article: any) => {
+  const openOffcanvas = (article: Article) => {
     setSelectedArticle(article);
     setIsOffcanvasOpen(true);
   };
