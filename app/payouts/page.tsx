@@ -14,31 +14,51 @@ const PayoutPage = () => {
   const user = useSelector((state: RootState) => state.auth);
 
   const [defaultRates, setDefaultRates] = useState({
-    articleRate: parseFloat(localStorage.getItem('articleRate') || '20'),
+    articleRate: 20, // Default fallback value
   });
 
-  const [authorRates, setAuthorRates] = useState<Record<string, { articleRate: number }>>(() => {
-    const saved = localStorage.getItem('authorRates');
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [authorRates, setAuthorRates] = useState<Record<string, { articleRate: number }>>({});
+  const [isClient, setIsClient] = useState(false); // Track if we're on the client side
 
+  // UseEffect to update `isClient` to true after the component mounts
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Fetch and set rates from localStorage only on the client side
+  useEffect(() => {
+    if (isClient) {
+      const storedArticleRate = localStorage.getItem('articleRate');
+      const storedAuthorRates = localStorage.getItem('authorRates');
+
+      if (storedArticleRate) {
+        setDefaultRates({
+          articleRate: parseFloat(storedArticleRate),
+        });
+      }
+
+      if (storedAuthorRates) {
+        setAuthorRates(JSON.parse(storedAuthorRates));
+      }
+    }
+
+    dispatch(fetchNews());
+  }, [isClient, dispatch]);
+
+  // Store rates to localStorage on change
+  useEffect(() => {
+    if (isClient) {
+      localStorage.setItem('articleRate', defaultRates.articleRate.toString());
+      localStorage.setItem('authorRates', JSON.stringify(authorRates));
+    }
+  }, [defaultRates, authorRates, isClient]);
+
+  // Redirect unauthorized users
   useEffect(() => {
     if (!user || user.role !== 'admin') {
       router.push('/unauthorized');
     }
   }, [user, router]);
-
-  useEffect(() => {
-    localStorage.setItem('articleRate', defaultRates.articleRate.toString());
-  }, [defaultRates]);
-
-  useEffect(() => {
-    localStorage.setItem('authorRates', JSON.stringify(authorRates));
-  }, [authorRates]);
-
-  useEffect(() => {
-    dispatch(fetchNews());
-  }, [dispatch]);
 
   const getAuthorRate = (name: string) => {
     return authorRates[name] || defaultRates;
