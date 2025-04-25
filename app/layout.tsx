@@ -31,7 +31,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReduxProvider>
           <LayoutWithSidebar>
-            <div className='ml-60'>
+            <div className='lg:ml-60'>
             {children}
             </div>
           </LayoutWithSidebar>

@@ -44,7 +44,7 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ articles, authorMap
     ],
   };
 
-  // Bar chart
+  // Bar chart for top authors
   const topAuthors = Object.entries(authorMap)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5);
@@ -82,31 +82,66 @@ const AnalyticsSection: React.FC<AnalyticsSectionProps> = ({ articles, authorMap
   };
 
   return (
-    <div>
-      {/* Charts Section */}
-      <div className="space-y-10">
-        {/* Bar Chart */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Top Authors</h2>
-          <div className="h-[400px]">
-            <Bar data={barData} options={{ responsive: true, maintainAspectRatio: false }} />
-          </div>
+    <div className="space-y-10">
+      {/* Top Authors Bar Chart */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Top Authors</h2>
+        <div className="h-[400px]">
+          <Bar 
+            data={barData} 
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: (context) => `${context.label}: ${context.raw} Articles`,
+                  },
+                },
+              },
+            }} 
+          />
         </div>
+      </div>
 
-        {/* Pie Chart */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Article Type Distribution</h2>
-          <div className="w-full max-w-sm mx-auto">
-            <Pie data={pieData} options={{ responsive: true }} />
-          </div>
+      {/* Article Type Distribution Pie Chart */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Article Type Distribution</h2>
+        <div className="w-full max-w-sm mx-auto">
+          <Pie 
+            data={pieData} 
+            options={{
+              responsive: true,
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: (context) => `${context.label}: ${context.raw} Articles`,
+                  },
+                },
+              },
+            }} 
+          />
         </div>
+      </div>
 
-        {/* Line Chart */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Article Trends</h2>
-          <div className="h-[300px] overflow-x-auto">
-            <Line data={lineData} options={{ responsive: true, maintainAspectRatio: false }} />
-          </div>
+      {/* Article Trends Line Chart */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Article Trends</h2>
+        <div className="h-[300px] overflow-x-auto">
+          <Line 
+            data={lineData} 
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: (context) => `${context.label}: ${context.raw} Articles`,
+                  },
+                },
+              },
+            }} 
+          />
         </div>
       </div>
     </div>

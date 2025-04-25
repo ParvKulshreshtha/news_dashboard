@@ -16,7 +16,7 @@ const Sidebar: React.FC<SidebarProps> = ({ tabs }) => {
     const router = useRouter();
 
     return (
-        <div className="w-52 h-screen fixed bottom-0 top-0 left-0 bg-gray-100 p-4 border-r border-gray-300">
+        <div className="w-52 h-screen fixed bottom-0 top-0 left-0 bg-gray-100 p-4 shadow-lg">
             <ul className="space-y-2">
                 {tabs.map((tab) => (
                     <li

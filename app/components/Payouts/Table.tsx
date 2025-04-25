@@ -24,7 +24,7 @@ const Table: React.FC<TableProps> = ({ authorStats, getAuthorRate, calculatePayo
   return (
     <div>
       {/* Author Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow-sm">
+      <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
         <table className="min-w-full divide-y divide-gray-200 text-sm">
           <thead className="bg-gray-50">
             <tr>
