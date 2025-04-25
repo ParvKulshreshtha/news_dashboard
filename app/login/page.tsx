@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { login } from '../redux/Slices/authSlice';
@@ -11,17 +11,24 @@ const LoginPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
+  useEffect(() => {
+    // Check if user is already logged in
+    const token = localStorage.getItem('token');
+    console.log("token",token)
+    if (token) {
+      router.push('/dashboard');
+    }
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Check local credentials
     if (email === 'admin@admin.com' && password === '12345') {
-      // Simulate token generation for admin login
       const token = 'adminToken';
       dispatch(login({ email, token }));
       router.push('/dashboard'); // Redirect to dashboard for admin
     } else if (email === 'user@example.com' && password === 'password123') {
-      // Simulate token generation for user login
       const token = 'userToken';
       dispatch(login({ email, token }));
       router.push('/dashboard'); // Redirect to dashboard for regular user

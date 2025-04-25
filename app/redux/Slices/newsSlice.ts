@@ -1,5 +1,6 @@
 // store/slices/newsSlice.ts
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 export interface Article {
   title: string;
@@ -13,7 +14,7 @@ export interface Article {
 
 interface Filters {
   author: string;
-  type: 'all' | 'news' | 'blog';
+  type: string;
   startDate: string;
   endDate: string;
 }
@@ -24,8 +25,7 @@ interface NewsState {
   error: string | null;
   filters: Filters;
   sort: {
-    field: 'publishedAt' | 'title' | 'author';
-    direction: 'asc' | 'desc';
+    field: string;
   };
 }
 
@@ -40,14 +40,13 @@ const initialState: NewsState = {
     endDate: '',
   },
   sort: {
-    field: 'publishedAt',
-    direction: 'desc', // newest first
+    field: '',
   }  
 };
 
 export const fetchNews = createAsyncThunk('news/fetchNews', async () => {
   const response = await fetch(
-    'https://newsapi.org/v2/everything?q=pakistan&apiKey=501eecc06f9843519f8208419df9a6b0'
+    `https://newsapi.org/v2/everything?q=india&apiKey=${process.env.NEXT_PUBLIC_NEWS_API_KEY}`,
   );
   const data = await response.json();
   return data.articles as Article[];
@@ -60,7 +59,7 @@ const newsSlice = createSlice({
     setAuthorFilter(state, action: PayloadAction<string>) {
       state.filters.author = action.payload;
     },
-    setTypeFilter(state, action: PayloadAction<'all' | 'news' | 'blog'>) {
+    setTypeFilter(state, action: PayloadAction<string>) {
       state.filters.type = action.payload;
     },
     setStartDateFilter(state, action: PayloadAction<string>) {
@@ -69,13 +68,9 @@ const newsSlice = createSlice({
     setEndDateFilter(state, action: PayloadAction<string>) {
       state.filters.endDate = action.payload;
     },
-    setSortField(state, action: PayloadAction<'publishedAt' | 'title' | 'author'>) {
+    setSortField(state, action: PayloadAction<string>) {
         state.sort.field = action.payload;
       },
-    setSortDirection(state, action: PayloadAction<'asc' | 'desc'>) {
-    state.sort.direction = action.payload;
-    },
-      
   },
   extraReducers: (builder) => {
     builder
@@ -94,6 +89,20 @@ const newsSlice = createSlice({
   },
 });
 
+export const selectAuthorStats = (state: RootState) => {
+    const stats: Record<string, { articles: number }> = {};
+  
+    state.news.newsData.forEach((article: Article) => {
+      const author = article.author?.trim() || 'Unknown';
+      if (!stats[author]) stats[author] = { articles: 0 };
+      stats[author].articles++;
+    });
+  
+    return Object.entries(stats).map(([name, counts]) => ({
+      name,
+      ...counts,
+    }));
+  };
 
 
 export const {
@@ -102,7 +111,6 @@ export const {
   setStartDateFilter,
   setEndDateFilter,
     setSortField,
-  setSortDirection
 } = newsSlice.actions;
 
 export default newsSlice.reducer;

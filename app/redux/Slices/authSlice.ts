@@ -24,17 +24,18 @@ const authSlice = createSlice({
       } else {
         state.role = 'user';
       }
-      localStorage.setItem('authToken', action.payload.token);
+      console.log(state)
+      localStorage.setItem('token', action.payload.token);
     },
     logout: (state) => {
       state.email = null;
       state.role = null;
       state.token = null;
       
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('token');
     },
     setAuthFromLocalStorage: (state) => {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       if (token) {
         state.token = token;
         if (token === 'adminToken') {

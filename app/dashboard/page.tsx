@@ -1,51 +1,115 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { Bar, Line, Pie } from 'react-chartjs-2';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import { fetchNews, Article, selectAuthorStats } from '../redux/Slices/newsSlice';
+
+import {
+  Chart as ChartJS,
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+  TimeScale,
+} from 'chart.js';
+import AnalyticsSetion from '../components/Dashboard/AnalyticsSetion';
+
+ChartJS.register(
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+  TimeScale
+);
 
 const Dashboard = () => {
-  const { email, role, token } = useSelector((state: RootState) => state.auth);
+  const { token } = useSelector((state: RootState) => state.auth);
   const router = useRouter();
-
+  const dispatch = useDispatch<AppDispatch>();
+  const articles = useSelector((state: RootState) => state.news.newsData);
+  const user = useSelector((state: RootState) => state.auth);
+  const authorStats = useSelector(selectAuthorStats);
 
   useEffect(() => {
-    if (!token) {
-      router.push('/login'); // Redirect to login if not logged in
-    }
+    if (!token) router.push('/login');
   }, [token, router]);
+
+  useEffect(() => {
+    dispatch(fetchNews());
+  }, [dispatch]);
+
+  useEffect(() => {
+    console.log(localStorage.getItem('token'), user);
+  } , []);
+
+  // Stats calculation
+  const authorMap: Record<string, number> = {};
+  let blogCount = 0;
+  let newsCount = 0;
+
+  articles.forEach((article: Article) => {
+    const author = article.author?.trim() || 'Unknown';
+    const isBlog = article.content?.toLowerCase().includes('blog');
+    if (isBlog) blogCount++;
+    else newsCount++;
+
+    authorMap[author] = (authorMap[author] || 0) + 1;
+  });
+
+  const totalArticles = articles.length;
+  const uniqueAuthors = Object.keys(authorMap).length;
+  const getAuthorRate = (name: string) => {
+    const authorRates = JSON.parse(localStorage.getItem('authorRates') || '{}');
+    const defaultRates = {  articleRate: parseFloat(localStorage.getItem('articleRate') || '20') };
+    return authorRates[name] || defaultRates;
+  };
+
+  const calculatePayout = (author: string, articles: number) => {
+    const { articleRate } = getAuthorRate(author);
+    return articles * articleRate;
+  };
+
+
+
+  const totalPayout = authorStats?.reduce(
+    (sum, a) => sum + calculatePayout(a.name, a.articles),
+    0
+  );
+
+ 
+
+
   return (
-    <div className="p-4 sm:p-6 md:p-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Dashboard Overview</h1>
+    <div className="p-4 sm:p-6 md:p-8 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard Overview</h1>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white shadow rounded p-4">
-          <p className="text-gray-600 text-sm">Total Articles</p>
-          <p className="text-2xl font-semibold text-blue-600">152</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition duration-300">
+          <p className="text-sm text-gray-500 mb-1">Total Articles</p>
+          <p className="text-2xl font-bold text-blue-600">{totalArticles}</p>
         </div>
-        <div className="bg-white shadow rounded p-4">
-          <p className="text-gray-600 text-sm">Total Blogs</p>
-          <p className="text-2xl font-semibold text-green-600">68</p>
+        <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition duration-300">
+          <p className="text-sm text-gray-500 mb-1">Unique Authors</p>
+          <p className="text-2xl font-bold text-purple-600">{uniqueAuthors}</p>
         </div>
-        <div className="bg-white shadow rounded p-4">
-          <p className="text-gray-600 text-sm">Unique Authors</p>
-          <p className="text-2xl font-semibold text-purple-600">24</p>
-        </div>
-        <div className="bg-white shadow rounded p-4">
-          <p className="text-gray-600 text-sm">Total Payouts</p>
-          <p className="text-2xl font-semibold text-yellow-600">$3,480</p>
-        </div>
+        {user.role==="admin" && <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition duration-300">
+          <p className="text-sm text-gray-500 mb-1">Estimated Payouts</p>
+          <p className="text-2xl font-bold text-yellow-600">${totalPayout.toLocaleString()}</p>
+        </div>}
       </div>
 
-      {/* Chart Placeholder */}
-      <div className="bg-white shadow rounded p-6 mb-8">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">Monthly Payouts</h2>
-        <div className="h-64 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-sm">
-          Chart Placeholder (Insert chart.js / recharts component here)
-        </div>
-      </div>
-
+      <AnalyticsSetion articles={articles} authorMap={authorMap}/>
     </div>
   );
 };
